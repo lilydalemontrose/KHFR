@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Measure the plan — Keith Hume Fraser Reserve</title>
+<style>
+ body{margin:0;font-family:system-ui,sans-serif;background:#182A56;color:#fff;overflow:hidden}
+ #bar{position:fixed;top:0;left:0;right:0;background:#182A56f2;padding:8px 12px;z-index:10;display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-size:14px}
+ #bar b{color:#F5C518}
+ #bar a{color:#9db8f7}
+ #stage{position:fixed;inset:48px 0 0 0;overflow:hidden;cursor:crosshair;background:#0d1830;touch-action:none}
+ #world{position:absolute;transform-origin:0 0}
+ canvas,img{position:absolute;top:0;left:0;user-select:none;-webkit-user-drag:none}
+ button{background:#2749B8;color:#fff;border:0;border-radius:6px;padding:5px 12px;font-weight:700;cursor:pointer;font-size:15px}
+ .note{opacity:.75;font-size:12px}
+</style></head><body>
+<div id="bar">
+ <a href="index.html">&#8592; back</a>
+ <b>Measure the plan</b>
+ <span id="readout">tap two or more points</span>
+ <span id="coords" class="note"></span>
+ <button onclick="zoomBy(1.25)">+</button><button onclick="zoomBy(0.8)">&#8722;</button>
+ <button onclick="clearPts()">Clear</button>
+ <span class="note">scroll/buttons zoom &middot; drag pans &middot; click adds a point &middot; double-click ends &middot; indicative distances from the digitised plan (rev 9.37) &mdash; site survey to confirm</span>
+</div>
+<div id="stage"><div id="world">
+ <img id="map" src="assets/measure_base.jpg">
+ <canvas id="ov"></canvas>
+</div></div>
+<script>
+const Aa=3.138379,Ad=-3.138379,BX=-1113702.951,BY=18250033.402;
+const toWorld=(x,y)=>[(x-BX)/Aa,(y-BY)/Ad];
+const stage=document.getElementById('stage'),world=document.getElementById('world');
+const mapimg=document.getElementById('map'),cv=document.getElementById('ov'),ctx=cv.getContext('2d');
+let W=2080,H=2240,scale=0.3,ox=10,oy=6,drag=null,moved=false,pts=[],done=false;
+mapimg.addEventListener('load',()=>{W=mapimg.naturalWidth;H=mapimg.naturalHeight;cv.width=W;cv.height=H;fit();});
+function fit(){const r=stage.getBoundingClientRect();scale=Math.min(r.width/W,r.height/H)*0.98;
+ ox=(r.width-W*scale)/2;oy=(r.height-H*scale)/2;apply();}
+function apply(){world.style.transform=`translate(${ox}px,${oy}px) scale(${scale})`;}
+function zoomBy(f){const r=stage.getBoundingClientRect();zoomAt(r.width/2,r.height/2,f);}
+function zoomAt(mx,my,f){const ns=Math.min(8,Math.max(0.08,scale*f));
+ ox=mx-(mx-ox)*ns/scale;oy=my-(my-oy)*ns/scale;scale=ns;apply();draw();}
+stage.addEventListener('wheel',e=>{e.preventDefault();
+ const r=stage.getBoundingClientRect();zoomAt(e.clientX-r.left,e.clientY-r.top,e.deltaY<0?1.18:1/1.18);},{passive:false});
+stage.addEventListener('pointerdown',e=>{drag=[e.clientX-ox,e.clientY-oy];moved=false;stage.setPointerCapture(e.pointerId);});
+stage.addEventListener('pointermove',e=>{
+ if(drag){const nx=e.clientX-drag[0],ny=e.clientY-drag[1];
+  if(Math.hypot(nx-ox,ny-oy)>4)moved=true;
+  if(moved){ox=nx;oy=ny;apply();}}
+ const r=stage.getBoundingClientRect();
+ const px=(e.clientX-r.left-ox)/scale,py=(e.clientY-r.top-oy)/scale;
+ if(px>=0&&py>=0&&px<=W&&py<=H){const w=toWorld(px,py);
+  document.getElementById('coords').textContent=`E ${w[0].toFixed(1)} N ${w[1].toFixed(1)}`;}
+});
+stage.addEventListener('pointerup',e=>{
+ if(drag&&!moved){
+  const r=stage.getBoundingClientRect();
+  const px=(e.clientX-r.left-ox)/scale,py=(e.clientY-r.top-oy)/scale;
+  if(px>=0&&py>=0&&px<=W&&py<=H){if(done){pts=[];done=false;} pts.push([px,py]);draw();}
+ } drag=null;});
+stage.addEventListener('dblclick',e=>{e.preventDefault();done=true;});
+window.addEventListener('keydown',e=>{if(e.key==='Escape')clearPts();});
+window.addEventListener('resize',()=>{});
+function clearPts(){pts=[];done=false;draw();document.getElementById('readout').textContent='tap two or more points';}
+function segLen(a,b){const wa=toWorld(...a),wb=toWorld(...b);return Math.hypot(wb[0]-wa[0],wb[1]-wa[1]);}
+function draw(){ctx.clearRect(0,0,W,H);
+ if(!pts.length)return;
+ const s=Math.max(scale,0.15);
+ ctx.lineWidth=3/s;ctx.strokeStyle='#ff2d78';ctx.fillStyle='#ff2d78';
+ ctx.beginPath();ctx.moveTo(...pts[0]);
+ for(const p of pts.slice(1))ctx.lineTo(...p);
+ ctx.stroke();
+ let tot=0;
+ for(let i=0;i<pts.length;i++){
+  ctx.beginPath();ctx.arc(pts[i][0],pts[i][1],5/s,0,7);ctx.fill();
+  if(i>0){const L=segLen(pts[i-1],pts[i]);tot+=L;
+   const mx=(pts[i-1][0]+pts[i][0])/2,my=(pts[i-1][1]+pts[i][1])/2;
+   ctx.font=`${Math.round(15/Math.min(Math.max(scale,0.25),2))}px sans-serif`;
+   ctx.lineWidth=4/s;ctx.strokeStyle='#000';
+   ctx.strokeText(L.toFixed(1)+' m',mx+6,my-6);
+   ctx.fillStyle='#fff';ctx.fillText(L.toFixed(1)+' m',mx+6,my-6);
+   ctx.fillStyle='#ff2d78';ctx.strokeStyle='#ff2d78';}
+ }
+ if(pts.length>1){const last=segLen(pts[pts.length-2],pts[pts.length-1]);
+  document.getElementById('readout').innerHTML=`<b>total ${tot.toFixed(1)} m</b> &middot; last ${last.toFixed(1)} m`;}
+}
+</script></body></html>
