@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KHFR Master Plan — 3D Models</title>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+<style>
+  :root{--navy:#0b2148;--royal:#1f4fd8;--gold:#f2c230;}
+  *{box-sizing:border-box;margin:0}
+  body{font-family:system-ui,Segoe UI,Roboto,sans-serif;background:var(--navy);color:#fff;min-height:100vh;display:flex;flex-direction:column}
+  header{padding:14px 16px 8px}
+  header h1{font-size:1.15rem;font-weight:700}
+  header p{font-size:.8rem;opacity:.75;margin-top:2px}
+  .bar{display:flex;flex-wrap:wrap;gap:8px;padding:8px 16px}
+  .grp{display:flex;gap:6px;background:#122b5e;border-radius:10px;padding:5px}
+  button{border:0;border-radius:7px;padding:8px 13px;font-size:.85rem;font-weight:600;background:transparent;color:#cfe0ff;cursor:pointer}
+  button.on{background:var(--royal);color:#fff}
+  button.gold.on{background:var(--gold);color:#222}
+  model-viewer{flex:1;width:100%;min-height:70vh;background:linear-gradient(#16305f,#0b2148)}
+  footer{padding:8px 16px 14px;font-size:.72rem;opacity:.6}
+  .note{color:var(--gold)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Keith Hume Fraser Reserve — Master Plan 3D</h1>
+  <p>Lilydale Montrose United FC &amp; Montrose Cricket Club · drag to orbit, pinch to zoom · AR on supported phones</p>
+</header>
+
+<div class="bar">
+  <div class="grp" id="season">
+    <button data-s="summer" class="gold on">Summer · cricket</button>
+    <button data-s="winter" class="gold">Winter · football</button>
+  </div>
+  <div class="grp" id="stage">
+    <button data-t="1">Stage 1</button>
+    <button data-t="2">Stage 2</button>
+    <button data-t="3">Stage 3</button>
+    <button data-t="4">Stage 4</button>
+    <button data-t="full" class="on">Complete</button>
+  </div>
+</div>
+
+<model-viewer id="mv"
+  src="KHFR_summer_cricket.glb"
+  alt="KHFR master plan 3D model"
+  camera-controls touch-action="pan-y"
+  camera-orbit="35deg 65deg 620m" min-camera-orbit="auto auto 40m" max-camera-orbit="auto 88deg 1400m"
+  interaction-prompt="none" exposure="1.05" shadow-intensity="0.4"
+  ar ar-modes="webxr scene-viewer quick-look">
+</model-viewer>
+
+<footer>
+  Stage 1: Pitches 3 &amp; 4 · Stage 2: new car park · Stage 3: pavilion &amp; access · Stage 4: Pitches 1 &amp; 2.
+  <span class="note">Keep the .glb files in the same folder as this page. Serve over http(s) — opening as file:// will not load models.</span>
+</footer>
+
+<script>
+const mv=document.getElementById('mv');
+let season='summer', stg='full';
+function fname(){
+  if(stg==='full') return season==='summer' ? 'KHFR_summer_cricket.glb' : 'KHFR_winter_football.glb';
+  return `KHFR_stage${stg}_${season}.glb`;
+}
+function apply(){ mv.src=fname(); }
+document.getElementById('season').addEventListener('click',e=>{
+  if(!e.target.dataset.s) return;
+  season=e.target.dataset.s;
+  [...e.currentTarget.children].forEach(b=>b.classList.toggle('on',b===e.target));
+  apply();
+});
+document.getElementById('stage').addEventListener('click',e=>{
+  if(!e.target.dataset.t) return;
+  stg=e.target.dataset.t;
+  [...e.currentTarget.children].forEach(b=>b.classList.toggle('on',b===e.target));
+  apply();
+});
+</script>
+</body>
+</html>
