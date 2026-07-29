@@ -30,8 +30,8 @@
 
 <div class="bar">
   <div class="grp" id="season">
-    <button data-s="summer" class="gold on">Summer · cricket</button>
-    <button data-s="winter" class="gold">Winter · football</button>
+    <button data-s="summer" class="gold">Summer · cricket</button>
+    <button data-s="winter" class="gold on">Winter · football</button>
   </div>
   <div class="grp" id="stage">
     <button data-t="0">Existing</button>
@@ -44,7 +44,7 @@
 </div>
 
 <model-viewer id="mv"
-  src="KHFR_summer_cricket.glb"
+  src="KHFR_winter_football.glb?v=13"
   alt="KHFR master plan 3D model"
   camera-controls touch-action="pan-y"
   camera-orbit="35deg 65deg 620m" min-camera-orbit="auto auto 40m" max-camera-orbit="auto 88deg 1400m"
@@ -59,10 +59,11 @@
 
 <script>
 const mv=document.getElementById('mv');
-let season='summer', stg='full';
+const VER='13';
+let season='winter', stg='full';
 function fname(){
-  if(stg==='full') return season==='summer' ? 'KHFR_summer_cricket.glb' : 'KHFR_winter_football.glb';
-  return `KHFR_stage${stg}_${season}.glb`;
+  const f = stg==='full' ? (season==='summer' ? 'KHFR_summer_cricket.glb' : 'KHFR_winter_football.glb') : `KHFR_stage${stg}_${season}.glb`;
+  return `${f}?v=${VER}`;
 }
 function apply(){ mv.src=fname(); }
 document.getElementById('season').addEventListener('click',e=>{
