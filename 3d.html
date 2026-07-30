@@ -38,8 +38,7 @@
     <button data-t="1">Stage 1</button>
     <button data-t="2">Stage 2</button>
     <button data-t="3">Stage 3</button>
-    <button data-t="4">Stage 4</button>
-    <button data-t="full" class="on">Complete</button>
+    <button data-t="4" class="on">Stage 4 / Complete</button>
   </div>
 </div>
 
@@ -54,13 +53,13 @@
 
 <footer>
   Existing: today's ground &amp; clubrooms · Stage 1: Pitches 3 &amp; 4 · Stage 2: new car park · Stage 3: pavilion &amp; access (old buildings removed) · Stage 4: Pitches 1 &amp; 2.
-  <span class="note">Keep the .glb files in the same folder as this page. Serve over http(s) — opening as file:// will not load models.</span>
+  <span class="note" style="margin-left:auto;float:right">Drawing: rev 9.45 3D — 30 July 2026, 02:39 PM AEST</span>
 </footer>
 
 <script>
 const mv=document.getElementById('mv');
 const VER='13';
-let season='winter', stg='full';
+let season='winter', stg='4';
 function fname(){
   const f = stg==='full' ? (season==='summer' ? 'KHFR_summer_cricket.glb' : 'KHFR_winter_football.glb') : `KHFR_stage${stg}_${season}.glb`;
   return `${f}?v=${VER}`;
