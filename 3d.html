@@ -53,7 +53,7 @@
 
 <footer>
   Existing: today's ground &amp; clubrooms · Stage 1: Pitches 3 &amp; 4 · Stage 2: new car park · Stage 3: pavilion &amp; access (old buildings removed) · Stage 4: Pitches 1 &amp; 2.
-  <span class="note" style="margin-left:auto;float:right">Drawing: rev 9.45 3D — 30 July 2026, 02:39 PM AEST</span>
+  <span class="note" id="stamp" style="margin-left:auto;float:right">Drawing: rev 9.45 3D</span>
 </footer>
 
 <script>
@@ -64,7 +64,17 @@ function fname(){
   const f = stg==='full' ? (season==='summer' ? 'KHFR_summer_cricket.glb' : 'KHFR_winter_football.glb') : `KHFR_stage${stg}_${season}.glb`;
   return `${f}?v=${VER}`;
 }
-function apply(){ mv.src=fname(); }
+function stamp(){
+  const f=fname().split('?')[0];
+  fetch(f,{method:'HEAD'}).then(r=>{
+    const lm=r.headers.get('last-modified');
+    if(!lm) return;
+    const d=new Date(lm);
+    const s=d.toLocaleString('en-AU',{timeZone:'Australia/Melbourne',day:'numeric',month:'long',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true,timeZoneName:'short'});
+    document.getElementById('stamp').textContent='Drawing: rev 9.45 3D — '+s;
+  }).catch(()=>{});
+}
+function apply(){ mv.src=fname(); stamp(); }
 document.getElementById('season').addEventListener('click',e=>{
   if(!e.target.dataset.s) return;
   season=e.target.dataset.s;
