@@ -20,9 +20,11 @@
   model-viewer{flex:1;width:100%;min-height:70vh;background:linear-gradient(#16305f,#0b2148)}
   footer{padding:8px 16px 14px;font-size:.72rem;opacity:.6}
   .note{color:var(--gold)}
+#tip{position:fixed;display:none;z-index:40;background:#0b2545;color:#fff;padding:7px 11px;border-radius:8px;font:13px/1.35 system-ui;max-width:260px;box-shadow:0 4px 14px rgba(0,0,0,.35);pointer-events:none;transform:translate(-50%,-100%)}
 </style>
 </head>
 <body>
+<div id="tip"></div>
 <header>
   <h1>Keith Hume Fraser Reserve — Master Plan 3D</h1>
   <p>Lilydale Montrose United FC &amp; Montrose Cricket Club · drag to orbit, pinch to zoom · AR on supported phones</p>
@@ -91,5 +93,23 @@ apply();
 </script>
 <script data-goatcounter="https://khfr.goatcounter.com/count"
         async src="//gc.zgo.at/count.js"></script>
+<script>
+const FEATURES=[{"l":"Sydney blue gum \u2014 ~40 m (non-indigenous; removed with the Stage 4 works)","x":-55.3,"z":94.5,"r":11,"s0":0,"s1":3},{"l":"6 m ball-stop fence (P1)","x":-89.5,"z":145.2,"r":17,"s0":4,"s1":4},{"l":"6 m ball-stop fence (P1)","x":-15.9,"z":207.0,"r":17,"s0":4,"s1":4},{"l":"6 m ball-stop fence (P2)","x":-55.0,"z":74.6,"r":17,"s0":4,"s1":4},{"l":"6 m ball-stop fence (P2)","x":31.5,"z":147.3,"r":17,"s0":4,"s1":4},{"l":"6 m ball-stop fence (P3)","x":24.1,"z":1.3,"r":17,"s0":1,"s1":4},{"l":"6 m ball-stop fence (P3)","x":106.8,"z":70.8,"r":17,"s0":1,"s1":4},{"l":"6 m ball-stop fence (P4)","x":91.3,"z":-39.8,"r":17,"s0":1,"s1":4},{"l":"6 m ball-stop fence (P4)","x":154.9,"z":13.6,"r":17,"s0":1,"s1":4},{"l":"Return & Earn reverse-vending machine","x":24.9,"z":169.4,"r":8,"s0":3,"s1":4},{"l":"Log cabin (existing)","x":36.3,"z":124.2,"r":9,"s0":0,"s1":3},{"l":"Main club room (existing)","x":-52.3,"z":101.6,"r":12,"s0":0,"s1":3},{"l":"Change rooms (existing)","x":-32.5,"z":97.9,"r":9,"s0":0,"s1":3},{"l":"Covered concrete wicket (the Lalor hazard)","x":6.4,"z":109.2,"r":9,"s0":0,"s1":3},{"l":"Terrace Tennis clubhouse (existing, 150 m level)","x":-177.2,"z":134.7,"r":10,"s0":0,"s1":1},{"l":"New pavilion (Stage 3)","x":34.5,"z":80.0,"r":16,"s0":3,"s1":4},{"l":"Pavilion deck & scoreboard","x":1.2,"z":65.2,"r":9,"s0":3,"s1":4},{"l":"30 kL tank (existing)","x":-29.5,"z":79.3,"r":6,"s0":0,"s1":2},{"l":"30 kL tank (relocated)","x":-18.5,"z":43.3,"r":6,"s0":3,"s1":4},{"l":"Exercise park","x":148.9,"z":-44.0,"r":12,"s0":3,"s1":4},{"l":"New playground","x":-6.5,"z":33.9,"r":10,"s0":3,"s1":4},{"l":"Playground (existing)","x":132.8,"z":-29.1,"r":9,"s0":0,"s1":0},{"l":"Paperbarks (existing pair, kept to Stage 3)","x":1701434.1,"z":3758180.8,"r":9,"s0":0,"s1":3},{"l":"New car park \u2014 sloped deck, ~188 swept bays","x":-119.5,"z":168.7,"r":34,"s0":2,"s1":4},{"l":"Straight 5 m driveway (new access)","x":-91.3,"z":246.2,"r":16,"s0":2,"s1":4}];
+mv.addEventListener('click',ev=>{
+  const tip=document.getElementById('tip');
+  const hit=mv.positionAndNormalFromPoint(ev.clientX,ev.clientY);
+  if(!hit){tip.style.display='none';return;}
+  const p=hit.position; let best=null;
+  const s=(stg==='full')?4:+stg;
+  for(const f of FEATURES){
+    if(s<f.s0||s>f.s1) continue;
+    if(f.sea&&f.sea!==season) continue;
+    const d=Math.hypot(p.x-f.x,p.z-f.z);
+    if(d<f.r&&(!best||d<best.d)) best={d,f};
+  }
+  if(best){tip.textContent=best.f.l;tip.style.left=ev.clientX+'px';tip.style.top=(ev.clientY-12)+'px';tip.style.display='block';clearTimeout(tip._t);tip._t=setTimeout(()=>tip.style.display='none',4500);}
+  else tip.style.display='none';
+});
+</script>
 </body>
 </html>
